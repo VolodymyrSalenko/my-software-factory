@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The French Revolution, Visually</title>
+<meta name="description" content="An interactive guide to the key events of the French Revolution, 1789–1799.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">1789 – 1799</p>
+  <h1>The French Revolution, <span>visually</span></h1>
+  <p class="lead">Twelve events that turned a kingdom into a republic. Click through the timeline, watch the map, and see the numbers behind the story.</p>
+  <a class="btn" href="#timeline">Start the journey</a>
+</header>
+
+<main>
+
+<section id="why" class="reveal">
+  <h2>Why did it happen?</h2>
+  <p class="sub">Three pressures built up before 1789.</p>
+  <div class="cards">
+    <article class="card">
+      <h3>Unequal society</h3>
+      <p>Clergy and nobles had privileges. Almost everyone else, the Third Estate, paid most of the taxes.</p>
+    </article>
+    <article class="card">
+      <h3>Empty treasury</h3>
+      <p>Wars and court spending left the crown deep in debt. Roughly half of the royal budget went on interest.</p>
+    </article>
+    <article class="card">
+      <h3>Hungry people</h3>
+      <p>Bad harvests pushed bread prices up. In 1789 a loaf cost far more of a worker's day than usual.</p>
+    </article>
+  </div>
+
+  <div class="chart-grid">
+    <figure class="chart">
+      <figcaption>Price of a 4-pound loaf in Paris (sous)</figcaption>
+      <div class="bars" data-max="16">
+        <div class="bar-row"><span>Normal year</span><div class="track"><div class="fill" data-value="8"></div></div><b>8</b></div>
+        <div class="bar-row"><span>July 1789</span><div class="track"><div class="fill hot" data-value="14.5"></div></div><b>14.5</b></div>
+      </div>
+      <p class="note">Approximate figures commonly cited by historians.</p>
+    </figure>
+    <figure class="chart">
+      <figcaption>Where the royal budget went (approx., 1788)</figcaption>
+      <div class="bars" data-max="100">
+        <div class="bar-row"><span>Debt interest</span><div class="track"><div class="fill hot" data-value="50"></div></div><b>~50%</b></div>
+        <div class="bar-row"><span>Everything else</span><div class="track"><div class="fill" data-value="50"></div></div><b>~50%</b></div>
+      </div>
+      <p class="note">Rounded; sources differ on the exact share.</p>
+    </figure>
+  </div>
+</section>
+
+<section id="estates" class="reveal">
+  <h2>Three Estates, one vote each</h2>
+  <p class="sub">At the Estates-General of 1789, how votes were counted decided everything.</p>
+  <div class="toggle" role="group" aria-label="Voting method">
+    <button type="button" data-mode="order" aria-pressed="true">Vote by order</button>
+    <button type="button" data-mode="head" aria-pressed="false">Vote by head</button>
+  </div>
+  <div class="estates" id="estates-chart">
+    <div class="estate clergy"><span class="label">First Estate<br><small>Clergy</small></span><div class="seat-bar"><div class="fill" data-seats="291"></div></div><b class="votes"></b></div>
+    <div class="estate nobles"><span class="label">Second Estate<br><small>Nobility</small></span><div class="seat-bar"><div class="fill" data-seats="270"></div></div><b class="votes"></b></div>
+    <div class="estate third"><span class="label">Third Estate<br><small>Everyone else</small></span><div class="seat-bar"><div class="fill" data-seats="578"></div></div><b class="votes"></b></div>
+  </div>
+  <p id="estates-caption" class="caption" aria-live="polite"></p>
+  <p class="note">Deputies elected in 1789: 291 clergy, 270 nobles, 578 Third Estate. The Third Estate was about 98% of the population.</p>
+</section>
+
+<section id="timeline" class="reveal">
+  <h2>The timeline</h2>
+  <p class="sub">Click an event, or use the ← → keys.</p>
+
+  <div class="timeline-wrap">
+    <ol id="track" class="track-line" aria-label="Events"></ol>
+  </div>
+
+  <div class="detail-grid">
+    <article id="detail" class="detail" aria-live="polite" tabindex="-1">
+      <p class="date" id="d-date"></p>
+      <h3 id="d-title"></h3>
+      <p class="place" id="d-place"></p>
+      <p id="d-summary"></p>
+      <p class="why"><strong>Why it mattered:</strong> <span id="d-why"></span></p>
+      <div class="nav">
+        <button type="button" id="prev">← Previous</button>
+        <span id="counter"></span>
+        <button type="button" id="next">Next →</button>
+      </div>
+    </article>
+
+    <figure class="map-box">
+      <svg id="map" viewBox="0 0 400 390" role="img" aria-label="Map of France showing where the selected event happened">
+        <polygon id="france" points=""></polygon>
+      </svg>
+      <figcaption>Where it happened</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="power" class="reveal">
+  <h2>Who held power?</h2>
+  <p class="sub">Three governments in ten years, each ending in crisis.</p>
+  <div class="power" id="power-chart"></div>
+  <div class="axis"><span>May 1789</span><span>Nov 1799</span></div>
+</section>
+
+</main>
+
+<footer>
+  <p>Built as an exercise with Claude Code. Dates and figures are simplified for beginners; check a history book before citing them.</p>
+  <p><a href="../">← Back to the other pages</a></p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
