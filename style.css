@@ -120,3 +120,9 @@ footer { padding: 48px 16px; color: var(--muted); font-size: .9rem; text-align: 
   * { animation: none !important; transition: none !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+.cards.four { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.cards.four .card:nth-child(4) { border-color: var(--white); }
+.yrs { color: var(--gold) !important; font: 600 .8rem system-ui, sans-serif; margin-bottom: 6px !important; }
+.sources { color: var(--muted); font-size: .95rem; padding-left: 20px; }
+.sources li { margin: 8px 0; }

@@ -41,7 +41,7 @@ const EVENTS = [
     why: "It shocks Europe's monarchies and deepens the war and the divisions inside France." },
   { date: "Sept 1793 – July 1794", short: "1793–94", title: "The Reign of Terror", place: "paris",
     summary: "Fearing enemies at home and abroad, the Committee of Public Safety, led by Robespierre, uses special courts and the guillotine against suspected opponents.",
-    why: "About 17,000 official death sentences were carried out. The Terror saved the republic's armies but frightened its own supporters." },
+    why: "About 16,600 official death sentences were passed, and many more people died without trial or in prison. The Terror helped the republic raise armies but frightened its own supporters." },
   { date: "27 July 1794", short: "Jul 1794", title: "Fall of Robespierre", place: "paris",
     summary: "On 9 Thermidor in the revolutionary calendar, deputies turn on Robespierre. He is arrested and guillotined the next day.",
     why: "The Terror ends and a calmer, more cautious phase begins." },
