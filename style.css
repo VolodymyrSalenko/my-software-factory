@@ -126,3 +126,30 @@ footer { padding: 48px 16px; color: var(--muted); font-size: .9rem; text-align: 
 .yrs { color: var(--gold) !important; font: 600 .8rem system-ui, sans-serif; margin-bottom: 6px !important; }
 .sources { color: var(--muted); font-size: .95rem; padding-left: 20px; }
 .sources li { margin: 8px 0; }
+
+/* Power stages */
+.stages-box { margin: 4px 0 20px; }
+.stages-label { margin: 0 0 6px; color: var(--muted); font: 600 .8rem system-ui, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+.stages { list-style: none; margin: 0; padding: 5px 0 0; display: grid; grid-template-columns: repeat(7, minmax(84px, 1fr)); gap: 4px; overflow-x: auto; }
+.stages li { background: var(--bg2); color: var(--muted); font: 600 .74rem/1.25 system-ui, sans-serif; text-align: center; padding: 10px 4px; border-radius: 8px; border-bottom: 4px solid transparent; transition: background .4s, color .4s, border-color .4s, transform .4s; }
+.stages li.past { border-bottom-color: var(--blue); }
+.stages li.on { background: var(--red); color: #fff; border-bottom-color: var(--gold); transform: translateY(-3px); }
+.stage-note { margin: 10px 0 0; min-height: 1.6em; }
+
+/* Autoplay */
+.nav .mid { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.nav button#play { background: var(--red); }
+.progress { height: 4px; margin-top: 12px; background: rgba(127,127,160,.25); border-radius: 2px; overflow: hidden; }
+.progress[hidden] { display: none; }
+.progress span { display: block; height: 100%; background: var(--gold); animation: fillbar 6s linear forwards; }
+@keyframes fillbar { from { width: 0; } to { width: 100%; } }
+
+/* Map routes */
+.route { fill: none; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0; animation: draw 2s ease-in-out backwards; }
+.route.out { stroke: var(--red); }
+.route.back { stroke: var(--gold); }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.inset-box { margin-top: 10px; border-top: 1px solid rgba(127,127,160,.3); padding-top: 10px; }
+.inset-box[hidden] { display: none; }
+#inset { width: 100%; height: auto; display: block; background: rgba(59,111,216,.12); border-radius: 8px; }
+#map-caption { margin-top: 6px; }

@@ -27,10 +27,10 @@ const EVENTS = [
   { date: "26 August 1789", short: "Aug 1789", title: "Declaration of the Rights of Man", place: "versailles",
     summary: "The National Assembly adopts a statement that all men are born free and equal in rights, and that power comes from the nation.",
     why: "It ends legal privilege in principle and becomes a model for later human-rights texts." },
-  { date: "5–6 October 1789", short: "Oct 1789", title: "Women's March on Versailles", place: "versailles",
+  { date: "5–6 October 1789", short: "Oct 1789", title: "Women's March on Versailles", place: "versailles", routes: "march",
     summary: "Thousands of Parisian women, angry about bread prices, march to Versailles. The next day the royal family is brought to Paris.",
     why: "The king now lives among the people and under their pressure." },
-  { date: "20–21 June 1791", short: "June 1791", title: "Flight to Varennes", place: "varennes",
+  { date: "20–21 June 1791", short: "June 1791", title: "Flight to Varennes", place: "varennes", routes: "flight",
     summary: "The royal family tries to escape toward the eastern border in disguise, but is recognized and stopped at Varennes.",
     why: "Many French stop trusting the king, and the idea of a republic grows." },
   { date: "21–22 September 1792", short: "Sep 1792", title: "The Republic is proclaimed", place: "paris",
@@ -60,6 +60,36 @@ const POWER = [
   { name: "Directory", note: "Five directors", from: 1795.8, to: 1799.85, color: "#8a5fd0" }
 ];
 
+// Routes are approximate: straight lines between the main stops.
+const PARIS = [2.35, 48.86];
+const ROUTES = {
+  flight: {
+    target: "main", dy: 5, caption: "Flight route (approximate). Red: the escape east. Gold: the family is brought back to Paris.",
+    out: [PARIS, [2.88, 48.96], [4.37, 48.96], [4.9, 49.09], [5.19, 49.23]]
+  },
+  march: {
+    target: "inset", dy: 7, caption: "Zoom: Paris to Versailles, about 20 km. Red: the women march out. Gold: the royal family is brought to Paris.",
+    out: [[2.35, 48.857], [2.21, 48.824], [2.12, 48.805]]
+  }
+};
+const projectInset = ([lon, lat]) => [(lon - 2.05) * 876, (48.9 - lat) * 1332];
+const INSET_PLACES = {
+  paris: { name: "Paris", lonlat: [2.35, 48.857], dx: -10, dy: -10, anchor: "end" },
+  versailles: { name: "Versailles", lonlat: [2.12, 48.805], dx: 10, dy: 22, anchor: "start" }
+};
+
+const STAGES = [
+  { name: "Absolute monarchy", note: "The king rules alone." },
+  { name: "Constitutional monarchy", note: "The king shares power with an elected Assembly." },
+  { name: "Republic", note: "No king. The Convention governs." },
+  { name: "Terror", note: "The Committee of Public Safety governs by emergency rule." },
+  { name: "Thermidor", note: "The Convention, without Robespierre, governs more cautiously." },
+  { name: "Directory", note: "Five directors and two councils share power." },
+  { name: "Consulate", note: "Napoleon holds the real power." }
+];
+const STAGE_OF = [0, 0, 1, 1, 1, 1, 2, 2, 3, 4, 5, 6];
+const STEP_MS = 6000;
+
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = (id) => document.getElementById(id);
 let current = 0;
@@ -77,6 +107,55 @@ for (const [key, p] of Object.entries(PLACES)) {
     <text x="${x + p.dx}" y="${y + p.dy}" text-anchor="${p.anchor}">${p.name}</text>`;
   $("map").appendChild(g);
 }
+
+function addPins(svg, places, proj) {
+  for (const [key, p] of Object.entries(places)) {
+    const [x, y] = proj(p.lonlat);
+    const g = document.createElementNS(svgNS, "g");
+    g.setAttribute("class", "pin");
+    g.dataset.place = key;
+    g.innerHTML = `<circle class="pulse" cx="${x}" cy="${y}" r="8"></circle>
+      <circle class="core" cx="${x}" cy="${y}" r="5"></circle>
+      <text x="${x + p.dx}" y="${y + p.dy}" text-anchor="${p.anchor}">${p.name}</text>`;
+    svg.appendChild(g);
+  }
+}
+addPins($("inset"), INSET_PLACES, projectInset);
+
+function pathD(pts, proj, dy) {
+  return pts.map((p, i) => { const [x, y] = proj(p); return `${i ? "L" : "M"}${x.toFixed(1)} ${(y + dy).toFixed(1)}`; }).join(" ");
+}
+function drawRoutes(key) {
+  document.querySelectorAll(".route").forEach((n) => n.remove());
+  const r = key && ROUTES[key];
+  const inset = r && r.target === "inset";
+  $("inset-box").hidden = !inset;
+  $("map-caption").textContent = r ? r.caption : "Where it happened";
+  if (!r) return;
+  const svg = $(inset ? "inset" : "map");
+  const proj = inset ? projectInset : project;
+  const legs = [
+    { cls: "out", d: pathD(r.out, proj, 0), delay: 0.2 },
+    { cls: "back", d: pathD([...r.out].reverse(), proj, r.dy), delay: 2.4 }
+  ];
+  legs.forEach((leg) => {
+    const path = document.createElementNS(svgNS, "path");
+    path.setAttribute("class", "route " + leg.cls);
+    path.setAttribute("d", leg.d);
+    path.setAttribute("pathLength", "1");
+    path.style.animationDelay = leg.delay + "s";
+    svg.insertBefore(path, svg.querySelector(".pin"));
+  });
+}
+
+// ---------- Power stages ----------
+const stagesEl = $("stages");
+STAGES.forEach((st, i) => {
+  const li = document.createElement("li");
+  li.textContent = st.name;
+  li.dataset.i = i;
+  stagesEl.appendChild(li);
+});
 
 // ---------- Timeline ----------
 const track = $("track");
@@ -103,26 +182,64 @@ function select(i, { scroll = true } = {}) {
     if (Number(n.dataset.i) === current) n.setAttribute("aria-current", "true");
     else n.removeAttribute("aria-current");
   });
-  document.querySelectorAll(".pin").forEach((p) => p.classList.toggle("active", p.dataset.place === ev.place));
+  document.querySelectorAll(".pin").forEach((p) => p.classList.toggle("active", p.dataset.place === ev.place || (ev.routes === "march" && !!p.closest("#inset"))));
+  drawRoutes(ev.routes);
+  const stage = STAGE_OF[current];
+  stagesEl.querySelectorAll("li").forEach((li) => {
+    const n = Number(li.dataset.i);
+    li.classList.toggle("on", n === stage);
+    li.classList.toggle("past", n < stage);
+  });
+  $("stage-note").innerHTML = `<strong>${STAGES[stage].name}:</strong> ${STAGES[stage].note}`;
 
   const d = $("detail");
   d.classList.remove("swap");
   if (!reduce) { void d.offsetWidth; d.classList.add("swap"); }
   if (scroll) {
-    document.querySelector(`.node[data-i="${current}"]`).scrollIntoView({ behavior: reduce ? "auto" : "smooth", inline: "center", block: "nearest" });
+    const wrap = document.querySelector(".timeline-wrap");
+    const li = track.children[current];
+    wrap.scrollTo({ left: li.offsetLeft - (wrap.clientWidth - li.offsetWidth) / 2, behavior: reduce ? "auto" : "smooth" });
   }
 }
 
+// ---------- Autoplay ----------
+let timer = null;
+function setPlaying(on) {
+  clearTimeout(timer);
+  const b = $("play");
+  b.setAttribute("aria-pressed", String(on));
+  b.textContent = on ? "⏸ Pause" : "▶ Autoplay";
+  $("progress").hidden = !on;
+  if (on) {
+    if (current === EVENTS.length - 1) select(0);
+    schedule();
+  }
+}
+function schedule() {
+  clearTimeout(timer);
+  const bar = $("progress").firstElementChild;
+  bar.style.animation = "none";
+  void bar.offsetWidth;
+  bar.style.animation = "";
+  timer = setTimeout(() => {
+    if (current >= EVENTS.length - 1) { setPlaying(false); return; }
+    select(current + 1);
+    schedule();
+  }, STEP_MS);
+}
+const userSelect = (i, opts) => { setPlaying(false); select(i, opts); };
+$("play").addEventListener("click", () => setPlaying($("play").getAttribute("aria-pressed") !== "true"));
+
 track.addEventListener("click", (e) => {
   const b = e.target.closest(".node");
-  if (b) select(Number(b.dataset.i));
+  if (b) userSelect(Number(b.dataset.i));
 });
-$("prev").addEventListener("click", () => select(current - 1));
-$("next").addEventListener("click", () => select(current + 1));
+$("prev").addEventListener("click", () => userSelect(current - 1));
+$("next").addEventListener("click", () => userSelect(current + 1));
 document.addEventListener("keydown", (e) => {
   if (e.target.closest("button") && !e.target.closest(".node")) return;
-  if (e.key === "ArrowRight") { e.preventDefault(); select(current + 1); document.querySelector(`.node[data-i="${current}"]`).focus({ preventScroll: true }); }
-  if (e.key === "ArrowLeft") { e.preventDefault(); select(current - 1); document.querySelector(`.node[data-i="${current}"]`).focus({ preventScroll: true }); }
+  if (e.key === "ArrowRight") { e.preventDefault(); userSelect(current + 1); document.querySelector(`.node[data-i="${current}"]`).focus({ preventScroll: true }); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); userSelect(current - 1); document.querySelector(`.node[data-i="${current}"]`).focus({ preventScroll: true }); }
 });
 select(0, { scroll: false });
 
