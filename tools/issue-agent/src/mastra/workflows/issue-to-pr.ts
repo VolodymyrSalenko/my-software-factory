@@ -6,6 +6,7 @@ import { existsSync, realpathSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { buildPrompt, runClaudeCode } from '../../agents/claude-code.ts'
+import { commitPushAndOpenPr } from '../../github/open-pr.ts'
 
 const run = promisify(execFile)
 
@@ -69,46 +70,56 @@ const createBranch = createStep({
   },
 })
 
+// What steps 3-5 carry along.
+const workShape = {
+  repo: z.string(),
+  baseBranch: z.string(),
+  issueNumber: z.number(),
+  title: z.string(),
+  branch: z.string(),
+  workdir: z.string(),
+  summary: z.string(),
+}
+
 // Step 3: run the coding agent (Claude Code) inside the worktree.
 const runCodingAgent = createStep({
   id: 'run-coding-agent',
   inputSchema: z.object({ ...issueShape, branch: z.string(), workdir: z.string() }),
-  outputSchema: z.object({ branch: z.string(), workdir: z.string(), issueNumber: z.number(), summary: z.string() }),
+  outputSchema: z.object(workShape),
   execute: async ({ inputData }) => {
-    const { workdir, issueNumber, title, body, branch } = inputData
+    const { workdir, issueNumber, title, body, branch, repo, baseBranch } = inputData
     console.log(`[run-coding-agent] Claude Code is working on "${title}" in ${workdir}`)
     const result = await runClaudeCode({ workdir, prompt: buildPrompt({ number: issueNumber, title, body }) })
     const { stdout } = await git(workdir, 'status', '--porcelain')
     if (!stdout.trim()) throw new Error('Claude Code finished but changed no files, so there is nothing to open a PR for.')
     const files = stdout.trim().split('\n').length
     console.log(`[run-coding-agent] done: ${files} file(s) changed${result.costUsd != null ? `, cost $${result.costUsd.toFixed(2)}` : ''}`)
-    return { branch, workdir, issueNumber, summary: result.summary }
+    return { repo, baseBranch, issueNumber, title, branch, workdir, summary: result.summary }
   },
 })
 
-// Step 4: screenshots of visual changes. Stub for now.
+// Step 4: screenshots of visual changes. Stub for now. Later it writes images into the worktree
+// (e.g. .pr-assets/) and returns their repo-relative paths so step 5 commits and embeds them.
 const takeScreenshots = createStep({
   id: 'take-screenshots',
-  inputSchema: z.object({ branch: z.string(), workdir: z.string(), issueNumber: z.number(), summary: z.string() }),
-  outputSchema: z.object({
-    branch: z.string(), workdir: z.string(), issueNumber: z.number(), summary: z.string(), screenshots: z.array(z.string()),
-  }),
+  inputSchema: z.object(workShape),
+  outputSchema: z.object({ ...workShape, screenshots: z.array(z.string()) }),
   execute: async ({ inputData }) => {
     console.log('[take-screenshots] none yet')
     return { ...inputData, screenshots: [] }
   },
 })
 
-// Step 5: open the pull request. Stub for now.
+// Step 5: commit, push and open the pull request. DRY_RUN=1 commits locally but pushes nothing.
 const openPullRequest = createStep({
   id: 'open-pull-request',
-  inputSchema: z.object({
-    branch: z.string(), workdir: z.string(), issueNumber: z.number(), summary: z.string(), screenshots: z.array(z.string()),
-  }),
+  inputSchema: z.object({ ...workShape, screenshots: z.array(z.string()) }),
   outputSchema: z.object({ prUrl: z.string(), branch: z.string(), workdir: z.string() }),
   execute: async ({ inputData }) => {
-    console.log(`[open-pull-request] would open PR for ${inputData.branch}, closes #${inputData.issueNumber}`)
-    return { prUrl: 'https://example.invalid/pr/stub', branch: inputData.branch, workdir: inputData.workdir }
+    const dryRun = process.env.DRY_RUN === '1'
+    const { prUrl } = await commitPushAndOpenPr({ ...inputData, dryRun })
+    console.log(`[open-pull-request] ${prUrl}`)
+    return { prUrl, branch: inputData.branch, workdir: inputData.workdir }
   },
 })
 
