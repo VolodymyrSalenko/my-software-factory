@@ -58,7 +58,7 @@ const createBranch = createStep({
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
     const branch = `issue-${issueNumber}-${slug}`
     // realpathSync.native expands Windows 8.3 short names (VOLODY~1); Claude Code blocks writes under those.
-    const workdir = join(realpathSync.native(tmpdir()), 'issue-agent', `${repoPath.split(/[\\/]/).pop()}-issue-${issueNumber}`)
+    const workdir = join(realpathSync.native(tmpdir()), 'issue-agent', `${repoPath.replace(/[\\/]+$/, '').split(/[\\/]/).pop()}-issue-${issueNumber}`)
 
     if (existsSync(workdir)) throw new Error(`Worktree already exists: ${workdir}. Remove it first (git worktree remove).`)
 
