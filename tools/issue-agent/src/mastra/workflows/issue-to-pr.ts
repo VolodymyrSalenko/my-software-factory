@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { buildPrompt, runClaudeCode } from '../../agents/claude-code.ts'
 import { commitPushAndOpenPr } from '../../github/open-pr.ts'
+import { captureBeforeAfter } from '../../screenshots/capture.ts'
 
 const run = promisify(execFile)
 
@@ -98,15 +99,21 @@ const runCodingAgent = createStep({
   },
 })
 
-// Step 4: screenshots of visual changes. Stub for now. Later it writes images into the worktree
-// (e.g. .pr-assets/) and returns their repo-relative paths so step 5 commits and embeds them.
+// Step 4: before/after screenshots when the change touches the site. Images are written into the worktree
+// (.pr-assets/) so step 5 commits them. A screenshot failure must not block the PR.
 const takeScreenshots = createStep({
   id: 'take-screenshots',
   inputSchema: z.object(workShape),
   outputSchema: z.object({ ...workShape, screenshots: z.array(z.string()) }),
   execute: async ({ inputData }) => {
-    console.log('[take-screenshots] none yet')
-    return { ...inputData, screenshots: [] }
+    try {
+      const screenshots = await captureBeforeAfter(inputData.workdir, inputData.issueNumber)
+      console.log(screenshots.length ? `[take-screenshots] ${screenshots.join(', ')}` : '[take-screenshots] no visual change, skipped')
+      return { ...inputData, screenshots }
+    } catch (e) {
+      console.warn(`[take-screenshots] failed, continuing without screenshots: ${(e as Error).message}`)
+      return { ...inputData, screenshots: [] }
+    }
   },
 })
 

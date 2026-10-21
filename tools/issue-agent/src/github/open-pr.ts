@@ -22,7 +22,8 @@ export function buildPrBody(i: Pick<PrInput, 'repo' | 'branch' | 'issueNumber' |
     parts.push('', '## Screenshots', '')
     for (const path of i.screenshots) {
       // Images are committed on the PR branch, so link to them there.
-      parts.push(`![${path}](https://github.com/${i.repo}/blob/${i.branch}/${path}?raw=true)`)
+      const alt = (path.split('/').pop() ?? path).replace(/\.[^.]+$/, '')
+      parts.push(`![${alt}](https://github.com/${i.repo}/blob/${i.branch}/${path}?raw=true)`)
     }
   }
   parts.push('', `Closes #${i.issueNumber}`, '', '🤖 Generated with [Claude Code](https://claude.com/claude-code)')
