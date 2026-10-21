@@ -74,10 +74,16 @@
 
 <section id="timeline" class="reveal">
   <h2>The timeline</h2>
-  <p class="sub">Click an event, or use the ← → keys.</p>
+  <p class="sub">Click an event, use the ← → keys, or press Autoplay for a guided tour.</p>
 
   <div class="timeline-wrap">
     <ol id="track" class="track-line" aria-label="Events"></ol>
+  </div>
+
+  <div class="stages-box">
+    <p class="stages-label">Who held power at this point</p>
+    <ol id="stages" class="stages" aria-label="Forms of government, in order"></ol>
+    <p id="stage-note" class="stage-note" aria-live="polite"></p>
   </div>
 
   <div class="detail-grid">
@@ -89,16 +95,20 @@
       <p class="why"><strong>Why it mattered:</strong> <span id="d-why"></span></p>
       <div class="nav">
         <button type="button" id="prev">← Previous</button>
-        <span id="counter"></span>
+        <span class="mid"><span id="counter"></span><button type="button" id="play" aria-pressed="false">▶ Autoplay</button></span>
         <button type="button" id="next">Next →</button>
       </div>
+      <div class="progress" id="progress" hidden><span></span></div>
     </article>
 
     <figure class="map-box">
       <svg id="map" viewBox="0 0 400 390" role="img" aria-label="Map of France showing where the selected event happened">
         <polygon id="france" points=""></polygon>
       </svg>
-      <figcaption>Where it happened</figcaption>
+      <div id="inset-box" class="inset-box" hidden>
+        <svg id="inset" viewBox="0 0 380 180" role="img" aria-label="Zoomed map of the road from Paris to Versailles"></svg>
+      </div>
+      <figcaption id="map-caption">Where it happened</figcaption>
     </figure>
   </div>
 </section>
@@ -127,6 +137,7 @@
     <li>Debt service of about 50% of the 1788 budget: <a href="https://digfir-published.macmillanusa.com/mckayworld10e/mckayworld10e_ch22_13.html">McKay et al., world history textbook</a> and a <a href="https://schule-bw.de/faecher-und-schularten/gesellschaftswissenschaftliche-und-philosophische-faecher/geschichte/unterricht/7-8/3-2.3/frenchrevolution/1ancienproblems.pdf">school handout based on J.-P. Jessenne</a> (50.5%).</li>
     <li>16,594 official death sentences during the Terror (June 1793 – July 1794): <a href="https://en.wikipedia.org/wiki/Reign_of_Terror">Wikipedia, Reign of Terror</a>. Many more people died without trial or in prison.</li>
     <li>Bread prices: <a href="https://www.mariegossip.com/2010/04/outside-versailles-bread.html">a popular-history blog</a> and other secondary sources. These are the weakest figures on the page, so treat them as a rough picture.</li>
+    <li>Routes on the maps (Flight to Varennes, Women's March) are simplified lines between the main stops, not exact roads.</li>
     <li>Estates-General seats (291 / 270 / 578) and the event dates come from standard histories and were not re-checked here.</li>
   </ul>
 </section>
